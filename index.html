@@ -1,0 +1,588 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#087f8c">
+<title>DailyBuy | Online Shopping</title>
+
+<style>
+:root{
+ --teal:#087f8c;--aqua:#11a5a2;--yellow:#ffc928;
+ --bg:#f4f7fa;--ink:#182630;--muted:#7a8991;--line:#e5ecef;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,input{font:inherit}
+button{cursor:pointer}
+header{
+ position:sticky;top:0;z-index:20;background:white;
+ padding:12px 15px;display:flex;align-items:center;
+ justify-content:space-between;border-bottom:1px solid var(--line)
+}
+.logo{font-size:27px;font-weight:900;letter-spacing:-1px}
+.logo .daily{color:var(--teal)}.logo .buy{color:#f2b500}
+.tagline{font-size:10px;color:var(--muted);margin-top:3px}
+.cart-button{border:0;background:#e8f7f6;color:var(--teal);border-radius:24px;padding:11px 13px;font-weight:bold}
+main{max-width:680px;margin:auto;padding:15px 14px 105px}
+.page{display:none}.page.active{display:block}
+.hero{
+ position:relative;overflow:hidden;color:white;padding:23px 18px;
+ border-radius:22px;background:linear-gradient(130deg,#075764,#10aaa5)
+}
+.hero h1{font-size:25px;line-height:1.3;max-width:75%;margin:0 0 8px}
+.hero p{font-size:13px;line-height:1.6;max-width:72%}
+.hero .art{position:absolute;right:12px;bottom:12px;font-size:64px;opacity:.35}
+.promo{display:inline-block;background:var(--yellow);color:#352900;padding:8px 10px;border-radius:9px;font-weight:bold;font-size:12px}
+.search{width:100%;margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:13px;outline-color:var(--teal)}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin:19px 0 12px}
+.section-title h2{font-size:18px;margin:0}
+.muted{color:var(--muted);font-size:12px}
+.categories{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.cat{border:1px solid var(--line);background:white;border-radius:14px;padding:13px 2px;font-size:11px;color:var(--ink)}
+.cat .emoji{display:block;font-size:25px;margin-bottom:6px}
+.products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.product{background:white;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.product-image{height:130px;display:grid;place-items:center;font-size:53px;background:linear-gradient(145deg,#e8f7f5,#fff6df)}
+.product-info{padding:11px}
+.product-name{font-size:13px;font-weight:bold;min-height:34px;line-height:1.4}
+.price{font-size:17px;font-weight:900;margin:8px 0}
+.old-price{font-size:11px;font-weight:normal;text-decoration:line-through;color:#8a969d;margin-left:5px}
+.primary,.add-button{width:100%;background:var(--teal);color:white;border:0;border-radius:11px;padding:12px;font-weight:bold}
+.add-button{padding:10px;font-size:12px}
+.secondary{background:#e8f7f6;color:var(--teal);border:0;border-radius:10px;padding:11px;font-weight:bold}
+.danger{background:#fff0f0;color:#b92f2f;border:0;border-radius:10px;padding:11px;font-weight:bold}
+.card{background:white;border:1px solid var(--line);border-radius:17px;padding:17px;margin-bottom:13px}
+.card h2,.card h3{margin-top:0}
+.field{margin:13px 0}
+.field label{display:block;font-size:13px;font-weight:bold;margin-bottom:7px}
+.field input{width:100%;padding:13px;border:1px solid #dbe4e8;border-radius:11px;outline-color:var(--teal);background:white}
+.help{font-size:12px;line-height:1.6;color:var(--muted)}
+.notice,.error{font-size:12px;line-height:1.6;padding:11px;border-radius:10px;margin:10px 0}
+.notice{background:#e8f7f5;color:#12656b}
+.error{background:#fff0f0;color:#a12c2c}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#eef3f5;padding:5px;border-radius:12px;margin:15px 0}
+.tabs button{border:0;background:transparent;color:var(--muted);padding:11px;border-radius:9px;font-weight:bold}
+.tabs button.active{background:white;color:var(--teal);box-shadow:0 1px 5px #0000000b}
+.otp-row{display:flex;gap:10px;align-items:center}
+.otp-row input{flex:1;min-width:0}
+.timer{font-size:12px;font-weight:bold;color:var(--teal);margin:10px 0}
+.link-button{background:transparent;border:0;color:var(--teal);font-weight:bold;padding:12px 0}
+.link-button:disabled{color:#9ba6ab;cursor:not-allowed}
+.profile-top{display:flex;gap:13px;align-items:center}
+.avatar{width:68px;height:68px;border-radius:50%;object-fit:cover;background:#e8f7f6;border:2px solid #d6eeeb}
+.order-row{padding:13px;border:1px solid var(--line);border-radius:12px;margin:10px 0;font-size:13px;line-height:1.7}
+.empty{text-align:center;padding:27px 10px;color:var(--muted);font-size:13px}
+footer{text-align:center;font-size:11px;color:var(--muted);padding:18px}
+
+/* Professional bottom navigation */
+.bottom-nav{
+ position:fixed;bottom:0;left:0;right:0;z-index:50;
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+ background:rgba(255,255,255,.98);border-top:1px solid var(--line);
+ padding:9px 5px max(9px,env(safe-area-inset-bottom));
+ box-shadow:0 -5px 20px rgba(20,50,60,.06)
+}
+.bottom-nav button{
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:5px;min-width:0;border:0;background:transparent;color:#87949b;
+ font-size:11px;font-weight:600;padding:4px 0
+}
+.bottom-nav svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bottom-nav button.active{color:var(--teal)}
+.bottom-nav button.active svg{stroke-width:2.25}
+.bottom-nav button.active span{font-weight:800}
+.toast{
+ display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+ z-index:100;background:#182630;color:white;padding:12px 16px;
+ border-radius:12px;font-size:13px;max-width:90%
+}
+#recaptcha-container{margin:10px 0}
+</style>
+</head>
+
+<body>
+<header>
+ <div>
+  <div class="logo"><span class="daily">Daily</span><span class="buy">Buy</span></div>
+  <div class="tagline">हर दिन खरीदारी, खुशियाँ आए ढेर सारी।</div>
+ </div>
+ <button class="cart-button" onclick="goTo('cart')">🛒 Cart <span id="cart-count">0</span></button>
+</header>
+
+<main>
+ <!-- HOME -->
+ <section class="page active" id="page-home">
+  <div class="hero">
+   <h1>आपकी पसंद, आपकी DailyBuy!</h1>
+   <p>अपनी ज़रूरत की चीज़ें चुनें और खरीदारी का आनंद लें।</p>
+   <span class="promo">हर दिन कुछ नया ✨</span>
+   <span class="art">🛍️</span>
+  </div>
+  <input id="search" class="search" placeholder="🔍 प्रोडक्ट खोजें..." oninput="renderProducts()">
+  <div class="section-title"><h2>कैटेगरी</h2></div>
+  <div class="categories">
+   <button class="cat" onclick="filterCategory('Fashion')"><span class="emoji">👕</span>Fashion</button>
+   <button class="cat" onclick="filterCategory('Electronics')"><span class="emoji">🎧</span>Electronics</button>
+   <button class="cat" onclick="filterCategory('Home')"><span class="emoji">🏠</span>Home</button>
+   <button class="cat" onclick="filterCategory('Beauty')"><span class="emoji">✨</span>Beauty</button>
+  </div>
+  <div class="section-title"><h2 id="home-heading">लोकप्रिय प्रोडक्ट</h2></div>
+  <div class="products" id="home-products"></div>
+ </section>
+
+ <!-- CATEGORY -->
+ <section class="page" id="page-category">
+  <div class="section-title"><h2>सभी कैटेगरी</h2></div>
+  <div class="categories">
+   <button class="cat" onclick="filterCategory('Fashion')"><span class="emoji">👕</span>Fashion</button>
+   <button class="cat" onclick="filterCategory('Electronics')"><span class="emoji">🎧</span>Electronics</button>
+   <button class="cat" onclick="filterCategory('Home')"><span class="emoji">🏠</span>Home</button>
+   <button class="cat" onclick="filterCategory('Beauty')"><span class="emoji">✨</span>Beauty</button>
+  </div>
+  <div class="section-title"><h2 id="category-heading">सभी प्रोडक्ट</h2></div>
+  <div class="products" id="category-products"></div>
+  <button class="secondary" style="width:100%;margin-top:15px" onclick="filterCategory('All')">सभी प्रोडक्ट दिखाएँ</button>
+ </section>
+
+ <!-- ACCOUNT -->
+ <section class="page" id="page-account">
+  <div id="auth-panel" class="card">
+   <h2>👋 Welcome to DailyBuy</h2>
+   <p class="help">मोबाइल OTP से अकाउंट बनाएँ या Login करें।</p>
+   <div class="tabs">
+    <button id="signup-tab" class="active" onclick="setMode('signup')">Create Account</button>
+    <button id="login-tab" onclick="setMode('login')">Login</button>
+   </div>
+
+   <div class="field" id="name-field">
+    <label for="name">पूरा नाम *</label>
+    <input id="name" autocomplete="name" placeholder="अपना नाम लिखें">
+   </div>
+   <div class="field">
+    <label for="phone">मोबाइल नंबर *</label>
+    <div class="otp-row"><b>+91</b><input id="phone" maxlength="10" inputmode="numeric" autocomplete="tel-national" placeholder="10 अंकों का नंबर"></div>
+   </div>
+   <div class="field" id="email-field">
+    <label for="email">ईमेल (वैकल्पिक)</label>
+    <input id="email" type="email" autocomplete="email" placeholder="example@email.com">
+   </div>
+
+   <button id="send-btn" class="primary" onclick="sendOTP()">मोबाइल पर OTP भेजें</button>
+
+   <div id="otp-panel" style="display:none">
+    <div class="notice">आपके मोबाइल पर SMS OTP भेजा गया है।</div>
+    <div class="field">
+     <label for="otp">6 अंकों का OTP</label>
+     <input id="otp" maxlength="6" inputmode="numeric" autocomplete="one-time-code" placeholder="OTP लिखें">
+    </div>
+    <div id="timer" class="timer">OTP समय: 01:00</div>
+    <button id="verify-btn" class="primary" onclick="verifyOTP()">Create Account</button>
+    <button id="resend-btn" class="link-button" onclick="sendOTP()" disabled>60 सेकंड बाद OTP दोबारा भेजें</button>
+   </div>
+   <div id="recaptcha-container"></div>
+   <div id="auth-message" aria-live="polite"></div>
+   <p class="help">अपना OTP किसी के साथ साझा न करें। मोबाइल ऑपरेटर के SMS शुल्क लागू हो सकते हैं।</p>
+  </div>
+
+  <div id="profile-panel" style="display:none">
+   <div class="card">
+    <div class="profile-top">
+     <img id="avatar" class="avatar" alt="Profile photo" style="display:none">
+     <div id="avatar-fallback" class="avatar" style="display:grid;place-items:center;font-size:27px">👤</div>
+     <div>
+      <h2 id="profile-name" style="margin:0 0 5px">My Account</h2>
+      <div id="profile-phone" class="help"></div>
+      <div id="profile-email" class="help"></div>
+     </div>
+    </div>
+    <div class="field">
+     <label for="photo">प्रोफ़ाइल फोटो अपलोड करें</label>
+     <input id="photo" type="file" accept="image/*" onchange="savePhoto(event)">
+     <p class="help">फोटो इस डिवाइस पर सेव होगी।</p>
+    </div>
+   </div>
+   <div class="card">
+    <h3>My Account</h3>
+    <button class="secondary" style="width:100%;margin-bottom:10px" onclick="goTo('orders')">My Orders</button>
+    <button class="danger" style="width:100%" onclick="logout()">Logout</button>
+   </div>
+  </div>
+ </section>
+
+ <!-- CART -->
+ <section class="page" id="page-cart">
+  <div class="section-title"><h2>🛒 मेरा Cart</h2></div>
+  <div class="card" id="cart-list"></div>
+ </section>
+
+ <!-- ORDERS -->
+ <section class="page" id="page-orders">
+  <div class="section-title"><h2>My Orders</h2></div>
+  <div class="card" id="order-list"></div>
+ </section>
+
+ <footer>DailyBuy • हर दिन खरीदारी, खुशियाँ आए ढेर सारी।</footer>
+</main>
+
+<!-- Bottom navigation with professional icons -->
+<nav class="bottom-nav" aria-label="Main navigation">
+ <button class="active" data-nav="home" onclick="goTo('home')">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>
+  <span>Home</span>
+ </button>
+ <button data-nav="category" onclick="goTo('category')">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+  <span>Category</span>
+ </button>
+ <button data-nav="account" onclick="goTo('account')">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2z"/></svg>
+  <span>Account</span>
+ </button>
+ <button data-nav="orders" onclick="goTo('orders')">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18H6z"/><path d="M9 7h6M9 11h6M9 15h4"/><path d="m9 18 1.5 1.5L14 16"/></svg>
+  <span>My Orders</span>
+ </button>
+</nav>
+<div id="toast" class="toast" role="status"></div>
+
+<!-- Firebase browser-compatible SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
+
+<script>
+/* Your Firebase web app configuration */
+const firebaseConfig = {
+ apiKey: "AIzaSyBRmb6W11aNhKaZ2iMhFBBmBsjDU2S56a4",
+ authDomain: "dailybuy-d07b4.firebaseapp.com",
+ projectId: "dailybuy-d07b4",
+ storageBucket: "dailybuy-d07b4.firebasestorage.app",
+ messagingSenderId: "877976956640",
+ appId: "1:877976956640:web:cc05ff5667dabec1d76a85",
+ measurementId: "G-S2EJJDPNZ7"
+};
+
+let auth=null,db=null,recaptcha=null,confirmation=null;
+let timer=null,seconds=60,mode="signup",pendingPhone="",currentUser=null,busy=false;
+let category="All";
+let cart=JSON.parse(localStorage.getItem("db_cart")||"[]");
+let orders=JSON.parse(localStorage.getItem("db_orders")||"[]");
+
+const products=[
+ {id:1,name:"स्टाइलिश टी-शर्ट",price:299,old:499,emoji:"👕",cat:"Fashion"},
+ {id:2,name:"वायरलेस हेडफोन",price:799,old:1299,emoji:"🎧",cat:"Electronics"},
+ {id:3,name:"होम डेकोर लैंप",price:499,old:799,emoji:"💡",cat:"Home"},
+ {id:4,name:"स्किन केयर किट",price:399,old:599,emoji:"🧴",cat:"Beauty"},
+ {id:5,name:"स्पोर्ट्स शूज़",price:999,old:1499,emoji:"👟",cat:"Fashion"},
+ {id:6,name:"स्मार्ट वॉच",price:1299,old:1999,emoji:"⌚",cat:"Electronics"},
+ {id:7,name:"कुशन सेट",price:349,old:499,emoji:"🛋️",cat:"Home"},
+ {id:8,name:"ब्यूटी किट",price:299,old:449,emoji:"💄",cat:"Beauty"}
+];
+
+function phoneId(phone){return String(phone||"").replace(/\D/g,"");}
+function toast(text){
+ const el=document.getElementById("toast");
+ el.textContent=text;el.style.display="block";
+ clearTimeout(toast.handle);
+ toast.handle=setTimeout(()=>el.style.display="none",3000);
+}
+function showMessage(text,isError=false){
+ const el=document.getElementById("auth-message");
+ el.className=isError?"error":"notice";
+ el.textContent=text;el.style.display="block";
+}
+function clearMessage(){
+ const el=document.getElementById("auth-message");
+ el.textContent="";el.style.display="none";
+}
+function readPhone(){
+ const n=document.getElementById("phone").value.replace(/\D/g,"");
+ if(!/^[6-9]\d{9}$/.test(n))throw Error("सही 10 अंकों का भारतीय मोबाइल नंबर लिखें।");
+ return "+91"+n;
+}
+function setMode(newMode){
+ mode=newMode;clearMessage();stopTimer();
+ confirmation=null;pendingPhone="";
+ document.getElementById("signup-tab").classList.toggle("active",mode==="signup");
+ document.getElementById("login-tab").classList.toggle("active",mode==="login");
+ document.getElementById("name-field").style.display=mode==="signup"?"block":"none";
+ document.getElementById("email-field").style.display=mode==="signup"?"block":"none";
+ document.getElementById("otp-panel").style.display="none";
+ document.getElementById("otp").value="";
+ document.getElementById("verify-btn").textContent=mode==="signup"?"Create Account":"Login";
+ document.getElementById("verify-btn").disabled=false;
+ document.getElementById("send-btn").disabled=false;
+ document.getElementById("send-btn").textContent="मोबाइल पर OTP भेजें";
+}
+function showAuth(){
+ document.getElementById("auth-panel").style.display="block";
+ document.getElementById("profile-panel").style.display="none";
+}
+function showProfile(profile,user){
+ document.getElementById("auth-panel").style.display="none";
+ document.getElementById("profile-panel").style.display="block";
+ document.getElementById("profile-name").textContent=profile.name||"DailyBuy Customer";
+ document.getElementById("profile-phone").textContent=user.phoneNumber||"";
+ document.getElementById("profile-email").textContent=profile.email||"ईमेल नहीं जोड़ा गया";
+ const saved=localStorage.getItem("db_photo_"+phoneId(user.phoneNumber));
+ document.getElementById("avatar").style.display=saved?"block":"none";
+ document.getElementById("avatar-fallback").style.display=saved?"none":"grid";
+ if(saved)document.getElementById("avatar").src=saved;
+}
+function initFirebase(){
+ try{
+  if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+  auth=firebase.auth();
+  db=firebase.firestore();
+  try{
+   if(firebase.analytics.isSupported())firebase.analytics();
+  }catch(e){console.info("Analytics unavailable in this environment.");}
+  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);
+
+  auth.onAuthStateChanged(async user=>{
+   currentUser=user||null;
+   if(!user){showAuth();return;}
+   try{
+    const snap=await db.collection("users").doc(phoneId(user.phoneNumber)).get();
+    if(!snap.exists){
+     await auth.signOut();
+     showMessage("इस नंबर का DailyBuy प्रोफ़ाइल नहीं मिला। Create Account या सही Login चुनें।",true);
+     return;
+    }
+    showProfile(snap.data(),user);
+   }catch(e){
+    console.error(e);
+    showMessage("प्रोफ़ाइल नहीं खुली। Firestore Database और Security Rules जाँचें।",true);
+   }
+  });
+ }catch(e){
+  console.error(e);
+  showMessage("Firebase शुरू नहीं हुआ: "+e.message,true);
+ }
+}
+async function setupRecaptcha(){
+ if(recaptcha){try{recaptcha.clear();}catch(e){}recaptcha=null;}
+ document.getElementById("recaptcha-container").innerHTML="";
+ recaptcha=new firebase.auth.RecaptchaVerifier("recaptcha-container",{
+  size:"normal",
+  "expired-callback":()=>showMessage("reCAPTCHA समाप्त हो गया। दोबारा कोशिश करें।",true)
+ });
+ await recaptcha.render();
+}
+async function sendOTP(){
+ if(busy)return;
+ if(!auth||!db){showMessage("Firebase कनेक्शन उपलब्ध नहीं है। Config और नेटवर्क जाँचें।",true);return;}
+ clearMessage();
+ let phone;
+ try{
+  phone=readPhone();
+  if(mode==="signup"){
+   if(!document.getElementById("name").value.trim())throw Error("अपना नाम लिखें।");
+   const email=document.getElementById("email").value.trim();
+   if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error("ईमेल सही लिखें या खाली छोड़ दें।");
+  }
+ }catch(e){showMessage(e.message,true);return;}
+
+ busy=true;
+ const btn=document.getElementById("send-btn");
+ btn.disabled=true;btn.textContent="OTP भेजा जा रहा है...";
+ try{
+  await setupRecaptcha();
+  confirmation=await auth.signInWithPhoneNumber(phone,recaptcha);
+  pendingPhone=phone;
+  document.getElementById("otp-panel").style.display="block";
+  document.getElementById("otp").value="";
+  document.getElementById("verify-btn").disabled=false;
+  document.getElementById("resend-btn").disabled=true;
+  startTimer();
+  showMessage("OTP SMS से भेज दिया गया है। 60 सेकंड के अंदर भरें।");
+ }catch(e){
+  console.error(e);
+  showMessage(firebaseMessage(e),true);
+  if(recaptcha){try{recaptcha.clear();}catch(x){}recaptcha=null;}
+ }finally{
+  busy=false;btn.disabled=false;btn.textContent="OTP दोबारा भेजें";
+ }
+}
+async function verifyOTP(){
+ if(busy)return;
+ if(!confirmation||!pendingPhone){showMessage("पहले OTP मँगाएँ।",true);return;}
+ if(seconds<=0){showMessage("टाइमर समाप्त। नया OTP मँगाएँ।",true);return;}
+ const code=document.getElementById("otp").value.trim();
+ if(!/^\d{6}$/.test(code)){showMessage("6 अंकों का OTP सही भरें।",true);return;}
+
+ busy=true;
+ const btn=document.getElementById("verify-btn");
+ btn.disabled=true;btn.textContent="सत्यापन हो रहा है...";
+ try{
+  const result=await confirmation.confirm(code);
+  const user=result.user;
+  const ref=db.collection("users").doc(phoneId(pendingPhone));
+  const snap=await ref.get();
+
+  if(mode==="signup"){
+   if(snap.exists){
+    await auth.signOut();
+    throw Error("इस नंबर का DailyBuy अकाउंट पहले से मौजूद है। Login चुनें।");
+   }
+   const profile={
+    name:document.getElementById("name").value.trim(),
+    email:document.getElementById("email").value.trim(),
+    phoneE164:pendingPhone,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+   };
+   await ref.set(profile);
+   stopTimer();confirmation=null;pendingPhone="";
+   showProfile(profile,user);toast("DailyBuy अकाउंट बन गया!");
+  }else{
+   if(!snap.exists){
+    await auth.signOut();
+    throw Error("इस नंबर का DailyBuy अकाउंट नहीं मिला। Create Account चुनें।");
+   }
+   stopTimer();confirmation=null;pendingPhone="";
+   showProfile(snap.data(),user);toast("Login सफल!");
+  }
+ }catch(e){
+  console.error(e);
+  showMessage(firebaseMessage(e),true);
+ }finally{
+  busy=false;
+  btn.textContent=mode==="signup"?"Create Account":"Login";
+  btn.disabled=seconds<=0;
+ }
+}
+function startTimer(){
+ stopTimer();seconds=60;updateTimer();
+ timer=setInterval(()=>{
+  seconds--;updateTimer();
+  if(seconds<=0){
+   stopTimer();
+   document.getElementById("verify-btn").disabled=true;
+   document.getElementById("resend-btn").disabled=false;
+   document.getElementById("resend-btn").textContent="OTP दोबारा भेजें";
+   document.getElementById("timer").textContent="समय समाप्त। नया OTP मँगाएँ।";
+  }
+ },1000);
+}
+function updateTimer(){
+ document.getElementById("timer").textContent="OTP समय: 00:"+String(seconds).padStart(2,"0");
+}
+function stopTimer(){if(timer){clearInterval(timer);timer=null;}}
+function firebaseMessage(e){
+ const map={
+  "auth/invalid-phone-number":"मोबाइल नंबर गलत है।",
+  "auth/invalid-verification-code":"OTP गलत है।",
+  "auth/code-expired":"OTP समाप्त हो गया। नया OTP मँगाएँ।",
+  "auth/too-many-requests":"बहुत प्रयास हुए हैं। कुछ देर बाद कोशिश करें।",
+  "auth/quota-exceeded":"Firebase SMS quota जाँचें।",
+  "auth/captcha-check-failed":"reCAPTCHA पूरा नहीं हुआ।",
+  "auth/operation-not-allowed":"Firebase Console में Phone Authentication चालू करें।",
+  "auth/unauthorized-domain":"वेबसाइट का डोमेन Firebase Authorized Domains में जोड़ें।",
+  "auth/network-request-failed":"इंटरनेट कनेक्शन जाँचें।",
+  "permission-denied":"Firestore Security Rules ने अनुरोध रोक दिया।"
+ };
+ if(e&&e.message&&e.message.includes("DailyBuy"))return e.message;
+ return map[e?.code]||e?.message||"कुछ गड़बड़ हुई। फिर प्रयास करें।";
+}
+async function logout(){
+ if(!auth)return;
+ try{
+  await auth.signOut();stopTimer();confirmation=null;pendingPhone="";
+  setMode("login");showAuth();goTo("account");toast("आप Logout हो गए।");
+ }catch(e){showMessage("Logout नहीं हुआ: "+e.message,true);}
+}
+function savePhoto(event){
+ const file=event.target.files&&event.target.files[0];
+ if(!file)return;
+ if(!file.type.startsWith("image/")){toast("इमेज फ़ाइल चुनें।");return;}
+ if(file.size>2*1024*1024){toast("2 MB से छोटी फोटो चुनें।");return;}
+ const reader=new FileReader();
+ reader.onload=()=>{
+  if(!currentUser){toast("पहले Login करें।");return;}
+  try{
+   localStorage.setItem("db_photo_"+phoneId(currentUser.phoneNumber),reader.result);
+   document.getElementById("avatar").src=reader.result;
+   document.getElementById("avatar").style.display="block";
+   document.getElementById("avatar-fallback").style.display="none";
+   toast("प्रोफ़ाइल फोटो सेव हो गई।");
+  }catch(e){toast("फोटो सेव नहीं हुई। छोटी फोटो चुनें।");}
+ };
+ reader.readAsDataURL(file);
+}
+
+/* Demo shopping catalogue */
+function productHTML(p){
+ return `<article class="product"><div class="product-image">${p.emoji}</div>
+ <div class="product-info"><div class="product-name">${p.name}</div>
+ <div class="price">₹${p.price}<span class="old-price">₹${p.old}</span></div>
+ <button class="add-button" onclick="addCart(${p.id})">＋ Cart में जोड़ें</button></div></article>`;
+}
+function renderProducts(){
+ const q=(document.getElementById("search")?.value||"").toLowerCase();
+ const list=products.filter(p=>(category==="All"||p.cat===category)&&p.name.toLowerCase().includes(q));
+ document.getElementById("home-heading").textContent=category==="All"?"लोकप्रिय प्रोडक्ट":category+" प्रोडक्ट";
+ document.getElementById("category-heading").textContent=category==="All"?"सभी प्रोडक्ट":category+" प्रोडक्ट";
+ const html=list.map(productHTML).join("")||'<div class="empty">कोई प्रोडक्ट नहीं मिला।</div>';
+ document.getElementById("home-products").innerHTML=html;
+ document.getElementById("category-products").innerHTML=html;
+}
+function filterCategory(c){
+ category=c;document.getElementById("search").value="";
+ renderProducts();goTo("category");
+}
+function addCart(id){
+ const p=products.find(x=>x.id===id),found=cart.find(x=>x.id===id);
+ if(found)found.qty++;else cart.push({...p,qty:1});
+ saveCart();toast("Cart में जोड़ दिया गया।");
+}
+function saveCart(){
+ localStorage.setItem("db_cart",JSON.stringify(cart));
+ document.getElementById("cart-count").textContent=cart.reduce((s,x)=>s+x.qty,0);
+ renderCart();
+}
+function renderCart(){
+ const el=document.getElementById("cart-list");
+ if(!cart.length){el.innerHTML='<div class="empty">आपका Cart खाली है 🛒</div>';return;}
+ const total=cart.reduce((s,x)=>s+x.price*x.qty,0);
+ el.innerHTML=cart.map(x=>`<div class="order-row"><b>${x.emoji} ${x.name}</b><br>₹${x.price} × ${x.qty}<button class="secondary" style="float:right;padding:6px" onclick="removeCart(${x.id})">हटाएँ</button></div>`).join("")+
+ `<h3>कुल: ₹${total}</h3><button class="primary" onclick="placeOrder()">डेमो ऑर्डर करें</button><p class="help">यह डेमो ऑर्डर है, वास्तविक भुगतान नहीं।</p>`;
+}
+function removeCart(id){cart=cart.filter(x=>x.id!==id);saveCart();}
+function placeOrder(){
+ if(!cart.length)return;
+ if(!currentUser){toast("ऑर्डर के लिए पहले Login करें।");goTo("account");return;}
+ const total=cart.reduce((s,x)=>s+x.price*x.qty,0);
+ orders.unshift({
+  id:"DB"+Date.now().toString().slice(-8),
+  date:new Date().toLocaleDateString("hi-IN"),
+  items:cart.map(x=>({...x})),total,status:"डेमो ऑर्डर"
+ });
+ localStorage.setItem("db_orders",JSON.stringify(orders));
+ cart=[];saveCart();renderOrders();goTo("orders");
+ toast("डेमो ऑर्डर बनाया गया।");
+}
+function renderOrders(){
+ const el=document.getElementById("order-list");
+ if(!orders.length){el.innerHTML='<div class="empty">अभी कोई ऑर्डर नहीं है 📦</div>';return;}
+ el.innerHTML=orders.map(o=>`<div class="order-row"><b>ऑर्डर #${o.id}</b><br><span class="muted">${o.date}</span><br>${o.items.map(i=>i.name+" × "+i.qty).join(", ")}<br><b>कुल: ₹${o.total}</b><br>${o.status}</div>`).join("");
+}
+function goTo(page){
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ const target=document.getElementById("page-"+page);
+ if(target)target.classList.add("active");
+ document.querySelectorAll(".bottom-nav button").forEach(b=>b.classList.toggle("active",b.dataset.nav===page));
+ if(page==="cart")renderCart();
+ if(page==="orders")renderOrders();
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+renderProducts();
+saveCart();
+renderOrders();
+setMode("signup");
+initFirebase();
+</script>
+</body>
+</html>
